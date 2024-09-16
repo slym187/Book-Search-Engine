@@ -30,6 +30,11 @@ server.start().then(() => {
   app.use(express.urlencoded({ extended: false }));
   app.use(express.json());
 
+  app.get('*.js', (req, res, next) => {
+    res.setHeader('Content-Type', 'application/javascript');
+    next();
+  });
+
   // Serve static assets if in production
   if (process.env.NODE_ENV === 'production') {
     app.use(express.static(path.join(__dirname, '../client/build')));
