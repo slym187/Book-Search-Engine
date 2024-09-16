@@ -1,41 +1,50 @@
 const express = require('express');
 const { ApolloServer } = require('apollo-server-express');
 const path = require('path');
-const db = require('./config/connection'); // Adjust path as needed
-const { typeDefs, resolvers } = require('./graphql/schema'); // Adjust path as needed
-const { authMiddleware } = require('./utils/auth'); // Import the updated authMiddleware
+const { typeDefs, resolvers } = require('./graphql/schema'); // Adjust the path if necessary
+const db = require('./config/connection');
+const { authMiddleware } = require('./utils/auth');
 
+// Initialize the Express application
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Create a new instance of ApolloServer
+// Configure the Apollo Server
 const server = new ApolloServer({
   typeDefs,
   resolvers,
-  context: ({ req }) => authMiddleware({ req }), // Pass the request object to authMiddleware
+  cache: 'bounded', // Set cache to 'bounded' to prevent memory exhaustion attacks
+  persistedQueries: false, // Disable persisted queries to avoid vulnerability
+  context: ({ req }) => {
+    // Use authMiddleware and ensure `req` is passed correctly
+    const context = authMiddleware({ req });
+    return context;
+  },
 });
 
-// Start the Apollo Server
+// Start the Apollo Server and apply middleware
 server.start().then(() => {
-  // Apply the Apollo GraphQL middleware and set the path to /graphql
   server.applyMiddleware({ app });
 
-  // Serve static files from the React app
-  app.use(express.static(path.join(__dirname, '../client/build')));
+  // Middleware for parsing JSON and form data
+  app.use(express.urlencoded({ extended: false }));
+  app.use(express.json());
 
-  // The "catchall" handler: for any request that doesn't match above, send back React's index.html file.
+  // Serve static assets if in production
+  if (process.env.NODE_ENV === 'production') {
+    app.use(express.static(path.join(__dirname, '../client/build')));
+  }
+
+  // Fallback route handler
   app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../client/build/index.html'));
   });
 
-  // Connect to the database
+  // Connect to MongoDB and start the Express server
   db.once('open', () => {
-    console.log('Connected to MongoDB');
-
-    // Start the Express server
     app.listen(PORT, () => {
-      console.log(`Server running at http://localhost:${PORT}${server.graphqlPath}`);
+      console.log(`🌍 Now listening on localhost:${PORT}`);
+      console.log(`🚀 Server ready at http://localhost:${PORT}${server.graphqlPath}`);
     });
   });
 });
-
