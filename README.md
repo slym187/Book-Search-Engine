@@ -12,3 +12,34 @@ Search for Books: Use the search bar to find books by title, author, or keywords
 Save Books: Click "Save this Book!" to save it to your personal list (requires user to be logged in).
 View Saved Books: Visit the "Saved" page to see all books you have saved.
 Delete Books: Remove any saved books from your list.
+
+# Features
+User Authentication: Sign up, log in, and log out functionality.
+Search for books using the Google Books API.
+Save books to a user-specific profile.
+Remove books from the saved list.
+Responsive design with React Bootstrap.
+
+# Technology
+Front End:
+
+React
+Apollo Client
+React Router
+React Bootstrap
+
+Back End:
+Node.js
+Express.js
+MongoDB
+GraphQL with Apollo Server
+
+# Deployment
+
+
+# Credit
+chatgpt
+
+# License
+Please refer to the LICENSE in the repo.
+
